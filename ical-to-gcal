@@ -16,10 +16,11 @@ use iCal::Parser;
 use LWP::Simple;
 use Getopt::Long;
 
-my ($calendar, $ical_url);
+my ($calendar, $ical_url, $config);
 Getopt::Long::GetOptions(
     "calendar|c=s"      => \$calendar,
     "ical_url|ical|i=s" => \$ical_url,
+    "configmachine|i=s" => \$configmachine,
 ) or die "Failed to parse options";
 
 if (!$ical_url) {
@@ -27,6 +28,9 @@ if (!$ical_url) {
 }
 if (!$calendar) {
     die "You must specify the calendar name (--calendar=...)";
+}
+if (!$config) {
+    die "You must specify the configmachine to use in  ~/.netrc (--configmachine=...)";
 }
 
 my $ical_data = LWP::Simple::get($ical_url)
@@ -64,8 +68,8 @@ for my $event_uid (keys %ical_events) {
 
 
 # Get our login details, and find the Google calendar in question:
-my $mach = Net::Netrc->lookup('calendar.google.com')
-    or die "No login details for calendar.google.com in ~/.netrc";
+my $mach = Net::Netrc->lookup('$configmachine')
+    or die "No login details for $configmachine in ~/.netrc";
 my ($user, $pass) = $mach->lpa;
 
 
@@ -87,7 +91,7 @@ $gcal->set_calendar($desired_calendar);
 my %gcal_events;
 
 gcal_event:
-for my $event ($gcal->get_events) {
+for my $event ($gcal->get_events ('max-results' => 99999)) {
     my ($ical_uid) = $event->content->body =~ m{\[ical_imported_uid:(.+)\]};
 
     # If there's no ical uid, we presumably didn't create this, so leave it
