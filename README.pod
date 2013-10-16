@@ -25,7 +25,7 @@ should specify them as e.g.:
     login yourgoogleusername
     password supersecretpassword
 
-You can specify many configurations in your <~/.netrc>.
+You can specify many configurations in your C<~/.netrc>.
 Of course, you'll want to ensure that file is well protected (chmod 600)
 
 
@@ -49,7 +49,8 @@ from an event, a new (duplicate) event will be created next time the script runs
 (and the old event will be "orphaned") - so don't do that.
 
 
-=head1 AUTHOR
+=head2 AUTHOR
 
 David Precious C<< <davidp@preshweb.co.uk> >>
+Mod. Yvan Godard C<< <godardyvan@gmail.com> >>
 
