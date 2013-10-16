@@ -27,7 +27,7 @@ if (!$ical_url) {
 if (!$calendar) {
     die "You must specify the calendar name (--calendar=...)";
 }
-if (!$config) {
+if (!$configmachine) {
     die "You must specify the configmachine to use in  ~/.netrc (--configmachine=...)";
 }
 
