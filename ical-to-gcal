@@ -14,7 +14,7 @@ use iCal::Parser;
 use LWP::Simple;
 use Getopt::Long;
 
-my ($calendar, $ical_url, $config);
+my ($calendar, $ical_url, $configmachine);
 Getopt::Long::GetOptions(
     "calendar|c=s"      => \$calendar,
     "ical_url|ical|i=s" => \$ical_url,
