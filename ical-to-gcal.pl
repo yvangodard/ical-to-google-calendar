@@ -22,7 +22,7 @@ my ($calendar, $ical_url, $configmachine);
 Getopt::Long::GetOptions(
     "calendar|c=s"      => \$calendar,
     "ical_url|ical|i=s" => \$ical_url,
-    "configmachine|i=s" => \$configmachine,
+    "configmachine|m=s" => \$configmachine,
 ) or die "Failed to parse options";
 
 if (!$ical_url) {
