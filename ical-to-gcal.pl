@@ -1,15 +1,13 @@
 #!/usr/bin/env perl
 
 # ical-to-gcal
-# A quick script to fetch and parse an iCal/vcal feed, and update a named Google
-# Calendar.
+# A quick script to fetch and parse an iCal/vcal feed, and update a named Google Calendar.
 #
 # See the README in the repo for more details on why and how to use it:
 # https://github.com/yvangodard/ical-to-google-calendar
 #
 # Original script by David Precious <davidp@preshweb.co.uk>
 # https://github.com/bigpresh/ical-to-google-calendar
-# 
 
 use strict;
 use Net::Google::Calendar;
