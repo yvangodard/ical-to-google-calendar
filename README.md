@@ -3,7 +3,15 @@ iCal-to-GoogleCalendar (iCal2Gcal)
 
 Description
 ------------
-A simple Perl script to parse an iCal-format (.ics) file, and update a Google Calendar with it, via the Google Calendar API.
+This tool is designed to synchronize an iCal-format (.ics) calendar to a a Google Calendar with it, via the Google Calendar API.
+
+For that, it downloads the ics file, parse it with a cleaner script to avoid incompatibily with Google (with a python Script), and a simple Perl script parse the cleaned file, and updates a Google Calendar with it, via the Google Calendar API (only one way).
+
+This tool includes some third-party scripts:
+
+- ical-to-gcal.py: Original version by Keith McCammon available from [http://mccammon.org/keith/](http://mccammon.org/keith/code) modded by Mario Aeby, [http://eMeidi.com](http://eMeidi.com), [https://github.com/emeidi/ical-to-gcal/blob/master/ical-to-gcal.py](https://github.com/emeidi/ical-to-gcal/blob/master/ical-to-gcal.py)
+
+- ical-to-gcal.pl: Original version by David Precious available form [https://github.com/bigpresh/ical-to-google-calendar](https://github.com/bigpresh/ical-to-google-calendar), modded to work with this tool by Yvan Godard, [https://github.com/yvangodard/ical-to-google-calendar/blob/master/ical-to-gcal.pl](https://github.com/yvangodard/ical-to-google-calendar/blob/master/ical-to-gcal.pl)
 
 
 Bug report
@@ -11,56 +19,25 @@ Bug report
 If you want to submit a bug ticket : [submit bug ticket](https://github.com/ygodard/ical-to-google-calendar/issues).
 
 
-Why ?
--------------
-Why not just add the iCal feed URL to Google Calendar and let them handle it?
-
-Because they update horribly slowly (expect about once every 24 hours).
-
-Calendaring is a time-sensitive thing; I don't want to wait a full day for updates to take effect (by the time Google re-fetch the feed and update my calendar, it could be too late!).
-
 Installation
 ---------
 
-Pour installer cet outil, depuis votre terminal :
-
-	git clone https://github.com/yvangodard/ldap2mailman.git ; 
-	sudo chmod -R 750 ldap2mailman
+	git clone https://github.com/yvangodard/ical-to-google-calendar.git ; 
+	sudo chmod -R 750 ical-to-google-calendar
 
 
-Configuration
--------
-The script will read your Google account details from `~/.netrc`, where you
-should specify them as e.g.:
 
-    machine calendar.google.com
-    login yourgoogleusername
-    password supersecretpassword
-
-You can specify many configurations in your `~/.netrc`.
-Of course, you'll want to ensure that file is well protected (chmod 600).
-
-Usage
+Help?
 -------
 
-    ./ical-to-gcal.pl --calendar='Calendar Name' --ical_url=ical_url --configmachine=calendar.google.com
+    ./ics-sync.sh -h
 
-The script will fetch the iCal calendar feed, then for each event in it,
-add/update an event in your Google Calendar (the ID from the iCal feed is added in the extra data of the event in the Google Calendar, so the script can match them up next time).
-
-The calendar name you provide must already exist in your Google Calendar
-account.
-
-The script adds a tag to each event's content to store the UID of the event
-imported from the iCal feed so that events can be updated in future, or deleted if they are no longer present in the source iCal feed.  If you remove this tag from an event, a new (duplicate) event will be created next time the script runs (and the old event will be "orphaned") - so don't do that.
 
 
 License
 -------
 
-Author David Precious <davidp@preshweb.co.uk> | Mod by [Yvan GODARD](http://www.yvangodard.me) <godardyvan@gmail.com>.
-
-Original script : <https://github.com/bigpresh/ical-to-google-calendar>
+Script by [Yvan GODARD](http://www.yvangodard.me) <godardyvan@gmail.com>.
 
 This script is licensed under Creative Commons 4.0 BY NC SA.
 
