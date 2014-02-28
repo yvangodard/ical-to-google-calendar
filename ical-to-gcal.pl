@@ -20,7 +20,7 @@ my ($calendar, $ical_url, $configmachine);
 Getopt::Long::GetOptions(
     "calendar|c=s"      => \$calendar,
     "ical_url|ical|i=s" => \$ical_url,
-    "configmachine|m=s" => \$configmachine,
+    "configmachine|i=s" => \$configmachine,
 ) or die "Failed to parse options";
 
 if (!$ical_url) {
@@ -68,7 +68,7 @@ for my $event_uid (keys %ical_events) {
 
 
 # Get our login details, and find the Google calendar in question:
-my $mach = Net::Netrc->lookup('$configmachine')
+my $mach = Net::Netrc->lookup($configmachine)
     or die "No login details for $configmachine in ~/.netrc";
 my ($user, $pass) = $mach->lpa;
 
@@ -149,6 +149,3 @@ for my $ical_uid (keys %ical_events) {
     $gcal->$method($gcal_event)
         or warn "Failed to $method for $ical_uid";
 }
-
-
-
