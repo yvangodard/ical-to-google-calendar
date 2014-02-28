@@ -300,7 +300,7 @@ echo -e "\n***********"
 ${PYTHON_ICS_CLEANER} ${PATH_ICS}/${LOCAL_FILE}.ics 2>&1
 [ $? -ne 0 ] && "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was not completed successfully by '${PYTHON_ICS_CLEANER}'."
 echo -e "***********\n"
-echo "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was completed successfully by '${PYTHON_ICS_CLEANER}'.\n"
+echo -e "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was completed successfully by '${PYTHON_ICS_CLEANER}'.\n"
 
 # Processing by ${PERL_SYNC_SCRIPT}
 echo "Processing commmand: '${PERL_SYNC_SCRIPT} --calendar=${CALENDAR_GCAL} --ical_url=${WEB_PATH_ICS}/${LOCAL_FILE}.gcal.ics --configmachine=${NETRC_CONFIG}'."
@@ -308,6 +308,6 @@ echo -e "\n***********"
 ${PERL_BIN} ${PERL_SYNC_SCRIPT} --calendar=${CALENDAR_GCAL} --ical_url=${WEB_PATH_ICS}/${LOCAL_FILE}.gcal.ics --configmachine=${NETRC_CONFIG} 2>&1
 [ $? -ne 0 ] && "Errors when using ${PERL_SYNC_SCRIPT}"
 echo -e "***********\n"
-echo "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${PERL_SYNC_SCRIPT}'."
+echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${PERL_SYNC_SCRIPT}'."
 
 alldone 0
