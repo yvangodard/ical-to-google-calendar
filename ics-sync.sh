@@ -71,7 +71,7 @@ help () {
 	echo -e "\t-C <GoogleCalendar Name>:             the name of the GoogleCalendar you want to sync to. This calendar must be created first."
 	echo -e "\t-p <temp path to save ics files>:     the path to save ics files 'in transit'. This path must be reachable via HTTP (i.e.: '/home/user/webserver/ical')"
 	echo -e "\t                                      and must exist before using this tool."
-	echo -e "\t-w <URL of temp path>:                the URL of the temp path (i.e.: 'http://y.server.com/path/to/icalpath')."
+	echo -e "\t-w <URL of temp path>:                the URL of the temp path (i.e.: 'http://my.server.com/path/to/icalpath')."
 	echo -e "\nOptional options:"
 	echo -e "\t-u <user to access to ics file>:      the user to use to connect to the URL of iCal-format (.ics) file (if authentification is needed)."
 	echo -e "\t-P <password to access to ics file>:  the  password of user to use to connect to the URL of iCal-format (.ics) file (if authentification is needed),"
@@ -98,9 +98,9 @@ alldone () {
 	[ ${LOG_ACTIVE} -eq 1 ] && cat ${LOG_TEMP} >> ${LOG}
 	# Print current log to standard outpout
 	[ ${LOG_ACTIVE} -ne 1 ] && cat ${LOG_TEMP}
-	[ ${EMAIL_LEVEL} -ne 0 ] && [ ${1} -ne 0 ] && cat ${LOG_TEMP} | mail -s "[ERROR : ${SCRIPT_NAME}] Processing URL: ${URL_CALENDAR}" ${EMAIL_ADDRESS} && rm ${LOG_TEMP} && exit ${1}
-	[ ${EMAIL_LEVEL} -ne 0 ] && [ $URL_OK -ne 0 ] && cat ${LOG_TEMP} | mail -s "[POSSIBLE ERROR : ldap2mailman.sh] Processing URL: ${URL_CALENDAR}" ${EMAIL_ADDRESS} && rm ${LOG_TEMP} && exit ${1}
-	[ ${EMAIL_LEVEL} -eq 2 ] && [ ${1} -eq 0 ] && cat ${LOG_TEMP} | mail -s "[OK : ldap2mailman.sh] list ${LISTNAME} (LDAP group $LDAPGROUP,$DNBASE)" ${EMAIL_ADDRESS} && rm ${LOG_TEMP} && exit ${1}
+	[ ${EMAIL_LEVEL} -ne 0 ] && [ ${1} -ne 0 ] && cat ${LOG_TEMP} | mail -s "[ERROR: ${SCRIPT_NAME}] Processing URL: ${URL_CALENDAR}" "${EMAIL_ADDRESS}" && rm ${LOG_TEMP} && exit ${1}
+	[ ${EMAIL_LEVEL} -eq 2 ] && [ ${1} -eq 0 ] && cat ${LOG_TEMP} | mail -s "[OK: ${SCRIPT_NAME}] Processing URL: ${URL_CALENDAR}" "${EMAIL_ADDRESS}" && rm ${LOG_TEMP} && exit ${1}	
+	[ ${EMAIL_LEVEL} -eq 2 ] && [ $URL_OK -ne 0 ] && cat ${LOG_TEMP} | mail -s "[POSSIBLE ERROR: ${SCRIPT_NAME}] Processing URL: ${URL_CALENDAR}" "${EMAIL_ADDRESS}" && rm ${LOG_TEMP} && exit ${1}
 	rm ${LOG_TEMP}
 	exit ${1}
 }
