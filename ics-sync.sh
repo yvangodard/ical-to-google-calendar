@@ -291,7 +291,7 @@ if [ -e ${PATH_ICS}/${LOCAL_FILE}.ics ]
 	cat ${PATH_ICS}/${LOCAL_FILE}.ics | head -n 10 | grep "BEGIN:VCALENDAR" > /dev/null
 	[ $? -ne 0 ] && error "File '${PATH_ICS}/${LOCAL_FILE}.ics' doesn't seem to be a correct calendar file."
 else
-	error "File {PATH_ICS}/${LOCAL_FILE}.ics doesn't exist"
+	error "File ${PATH_ICS}/${LOCAL_FILE}.ics doesn't exist"
 fi
 
 # Processing by ${PYTHON_ICS_CLEANER}
