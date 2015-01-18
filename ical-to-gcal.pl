@@ -9,12 +9,14 @@
 # Original script by David Precious <davidp@preshweb.co.uk>
 # https://github.com/bigpresh/ical-to-google-calendar
 
+
 use strict;
 use Net::Google::Calendar;
 use Net::Netrc;
 use iCal::Parser;
 use LWP::Simple;
 use Getopt::Long;
+use Digest::MD5;
 
 my ($calendar, $ical_url, $configmachine);
 Getopt::Long::GetOptions(
@@ -40,6 +42,12 @@ my $ic = iCal::Parser->new;
 
 my $ical = $ic->parse_strings($ical_data)
     or die "Failed to parse iCal data";
+
+# Hash the feed URL, so we can use it along with the event ID to uniquely
+# identify events - and when removing events that aren't in the feed any more,
+# remove only those which came from this feed, if the user is using multiple
+# feeds.  (10 characters of the hash should be enough to be reliable enough.)
+my $feed_url_hash = substr(Digest::MD5->md5_hex($ical_url), 0, 10);
 
 # We get events keyed by year, month, day - we just want a flat list of events
 # to walk through.  Do this keyed by the event ID, so that multiple-day events
@@ -91,16 +99,31 @@ $gcal->set_calendar($desired_calendar);
 my %gcal_events;
 
 gcal_event:
-for my $event ($gcal->get_events ('max-results' => 99999)) {
-    my ($ical_uid) = $event->content->body =~ m{\[ical_imported_uid:(.+)\]};
+for my $event ($gcal->get_events) {
+    my ($ical_feed_hash, $ical_uid) 
+        = $event->content->body =~ m{\[ical_imported_uid:(.+)/(.+)\]};
 
     # If there's no ical uid, we presumably didn't create this, so leave it
     # alone
     if (!$ical_uid) {
-        warn sprintf "Event %s (%s) ignored as it has no "
-            . "ical_imported_uid property",
-            $event->id,
-            $event->title;
+        # Special-case, though: previous versions of this script didn't store
+        # the feed hash, so if we have only the event UID, assume it was this
+        # feed so the script continues working
+        if ($ical_uid 
+            = $event->content->body =~ m{\[ical_imported_uid:(.+)\]}
+        ) {
+            $ical_feed_hash = $feed_url_hash;
+        } else {
+            warn sprintf "Event %s (%s) ignored as it has no "
+                . "ical_imported_uid property",
+                $event->id,
+                $event->title;
+            next gcal_event;
+        }
+    }
+
+    # OK, if the event isn't for this feed, let it be:
+    if ($ical_feed_hash ne $feed_url_hash) {
         next gcal_event;
     }
 
@@ -127,25 +150,43 @@ for my $ical_uid (keys %ical_events) {
     
     my ($method, $gcal_event);
 
-    if (exists $gcal_events{$ical_uid}) {
-        $gcal_event = $gcal_events{$ical_uid};
-        $method = 'update_entry';
-        print "Need to update ical event $ical_uid in gcal\n";
-    } else {
-        $gcal_event = Net::Google::Calendar::Entry->new;
-        $method = 'add_entry';
-        print "Need to create new gcal event for $ical_uid\n";
-    }
-
     my $ical_event = $ical_events{$ical_uid};
-    $gcal_event->title(    $ical_event->{SUMMARY}  );
-    $gcal_event->location( $ical_event->{LOCATION} );
-    $gcal_event->when( $ical_event->{DTSTART}, $ical_event->{DTEND} );
-
-    if ($method eq 'add_entry') {
-        $gcal_event->content("[ical_imported_uid:$ical_uid]");
-    }
+    my $gcal_event = ical_event_to_gcal_event(
+        $ical_event, $gcal_events{$ical_uid}
+    );
+    my $method = exists $gcal_events{$ical_uid}
+        ? 'update_entry' : 'add_entry';
 
     $gcal->$method($gcal_event)
         or warn "Failed to $method for $ical_uid";
+}
+
+
+# Given an iCal event hash (from iCal::Parser) (and possibly a
+# Net::Google::Calender event object to update), return an appropriate Google
+# Calendar event object (either the one given, after updating it, or a newly
+# populated one)
+# Note: does not actually add/update the event on the calendar, just returns the
+# event object.
+sub ical_event_to_gcal_event {
+    my ($ical_event, $gcal_event) = @_;
+    
+    if (ref $ical_event ne 'HASH') {
+        die "Given invalid iCal event";
+    }
+    if (defined $gcal_event && (!blessed($gcal_event) ||
+        !$gcal_event->isa('Net::Google::Calendar::Event')))
+    {
+        die "Given invalid Google Calendar event - what is it?";
+    }
+
+    $gcal_event ||= Net::Google::Calendar::Event->new;
+
+    my $ical_uid = $ical_event->{UID};
+    $gcal_event->title(    $ical_event->{SUMMARY}  );
+    $gcal_event->location( $ical_event->{LOCATION} );
+    $gcal_event->when( $ical_event->{DTSTART}, $ical_event->{DTEND} );
+    $gcal_event->content("[ical_imported_uid:$feed_url_hash/$ical_uid]");
+
+    return $gcal_event;
 }
