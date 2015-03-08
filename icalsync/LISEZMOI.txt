@@ -1,0 +1,52 @@
+#Version minimum requise : Ruby 1.9.2
+# Installation de ruby 1.9.2 sur Debian 6
+# NB: Bien que le package se nomme ruby1.9.1-full, c'est bien la version 1.9.2 de ruby qui est installée.
+sudo apt-get update
+sudo apt-get install -y ruby1.9.1-full
+
+cd /usr/bin
+sudo ln -sf ruby1.9.1 ruby
+sudo ln -sf gem1.9.1 gem
+sudo ln -sf erb1.9.1 erb
+sudo ln -sf irb1.9.1 irb
+sudo ln -sf rake1.9.1 rake
+sudo ln -sf rdoc1.9.1 rdoc
+sudo ln -sf testrb1.9.1 testrb
+
+# Installation du Gem manager :
+sudo gem install bundler
+
+# Copier le répertoire 'icalsync' vers l'emplacement de votre choix et ensuite:
+cd EMPLACEMENT_DE_VOTRE_CHOIX/icalsync
+
+# Installation des dépendances du programme:
+bundle install
+
+# Rendre le script exécutable
+chmod +x icalsync
+
+# Consulter les options disponibles :
+./icalsync -h
+
+# Exemple d'utilisation
+icalsync -f test/cals/lite.gcal.ics -c activeand.co_830bfgtr87tgc36o0bjqr0e9go@group.calendar.google.com -v
+
+# Premiere utilisation
+# Lors de la première utilisation, le script va initialiser le token d'authentification oauth 2.0 de Google.
+# Il vous suffira de suivre et d'exécuter les instructions à l'écran.
+
+# Configuration (fichier config.rb) :
+# CLIENT_ID: L'identifiant du client pour l'autorisation de l'application.
+# SECRET: Le secret du client pour l'autorisation de l'application
+# Toutes les informations ici : https://developers.google.com/api-client-library/ruby/guide/aaa_apikeys
+# Important: Lors de la création du clientID, sélectionnez 'installed application' puis 'other'.
+
+# FAQ
+# 1. Comment connaitre mon calendar_id ?
+#  - Connectez-vous à votre compte Google Calendar à l'adresse http://www.google.com/calendar ;
+#  - Sur la partie gauche, vous trouverez la liste de vos agendas disponibles ;
+#  - Cliquez sur la flèche de l'agenda que vous souhaitez synchroniser, puis sur Paramètres de l'agenda ;
+#  - L'identifiant de l'agenda se trouve en bas de la page, dans la section Adresse URL de l'agenda, ID de l'agenda.
+
+# 2. Comment renouveler le token d'authentification ?
+# Il vous suffit de supprimer le fichier ~/.google_agenda_token

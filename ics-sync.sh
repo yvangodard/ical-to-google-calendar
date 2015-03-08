@@ -10,7 +10,7 @@
 #              Yvan Godard                 #
 #          godardyvan@gmail.com            #
 #                                          #
-#     Version 1.2 -- february, 28 2014     #
+#     Version 2.0 -- february, 28 2015     #
 #             Under Licence                #
 #     Creative Commons 4.0 BY NC SA        #
 #                                          #
@@ -20,21 +20,20 @@
 
 # Variables initialisation
 
-VERSION="iCal2GoogleCalendar v1.2 - 2014, Yvan Godard [godardyvan@gmail.com]"
+VERSION="iCal2GoogleCalendar v2.0 2015, Yvan Godard [godardyvan@gmail.com]"
 help="no"
 SCRIPT_NAME=$(basename $0)
 SCRIPT_DIR=$(dirname $0)
 PYTHON_ICS_CLEANER=${SCRIPT_DIR}/ics-to-gcal.py
-PERL_SYNC_SCRIPT=${SCRIPT_DIR}/ical-to-gcal.pl
+RUBY_SCRIPT=${SCRIPT_DIR}/icalsync/icalsync
 URL_CALENDAR=""
 LOCAL_FILE=""
 NETRC_CONFIG=""
 CALENDAR_GCAL=""
 PATH_ICS=""
-WEB_PATH_ICS=""
 CURL_USER=""
 CURL_PASS=""
-PERL_BIN=/usr/bin/perl
+RUBY_BIN=/usr/bin/ruby
 LOG=/var/log/ics_sync.log
 LOG_ACTIVE=0
 LOG_TEMP=$(mktemp /tmp/tmp_log_ics_sync.XXXXX)
@@ -51,24 +50,19 @@ help () {
 	echo -e "This tool includes some third-party scripts:"
 	echo -e "\t- ical-to-gcal.py: Original version by Keith McCammon available from http://mccammon.org/keith/code"
 	echo -e "\t  modded by Mario Aeby, http://eMeidi.com,https://github.com/emeidi/ical-to-gcal/blob/master/ical-to-gcal.py"
-	echo -e "\t- ical-to-gcal.pl: Original version by David Precious available form https://github.com/bigpresh/ical-to-google-calendar,"
-	echo -e "\t  modded to work with this tool by Yvan Godard, https://github.com/yvangodard/ical-to-google-calendar/blob/master/ical-to-gcal.pl"
+	echo -e "\t- icalsyn: Written by Emmanuel Hoffman http://activeand.co"
 	echo -e "\nDisclamer:"
 	echo -e "This tool is provide without any support and guarantee."
 	echo -e "\nSynopsis:"
-	echo -e "./$SCRIPT_NAME [-h] | -c <URL of iCal-format (.ics) file> -n <Calendar temp name> -m <entry name in ~/.netrc> -C <GoogleCalendar Name>"
-	echo -e "                     -p <temp path to save ics files> -w <URL of temp path>"
-	echo -e "                    [-u <user to access to ics file>] [-P <password to access to ics file>] [-B <perl bin path>]"
+	echo -e "./$SCRIPT_NAME [-h] | -c <URL of iCal-format (.ics) file> -n <Calendar temp name>"
+	echo -e "                     -C <GoogleCalendar ID> -p <temp path to save ics files>"
+	echo -e "                    [-u <user to access to ics file>] [-P <password to access to ics file>] [-B <ruby bin path>]"
 	echo -e "                    [-e <email report option>] [-E <email address>] [-j <log file>]"
 	echo -e "\n\t-h:                                   prints this help then exit"
 	echo -e "\nMandatory options:"
 	echo -e "\t-c <URL of iCal-format (.ics) file>:  the URL of iCal-format (.ics) source calendar (i.e.: 'http://my.server.com/path/to/icsfile.ics')"
 	echo -e "\t-n <calendar temp name>:              the temp file name of this calendar"	
-	echo -e "\t-m <entry name in ~/.netrc>:          the machine entry in ~/.netrc file, with Google login and Google password, as this:"
-	echo -e "\t                                           machine my_netrc_entry_name"
-	echo -e "\t                                           login logintogoogle@my.server.com"
-	echo -e "\t                                           password the_full_password"
-	echo -e "\t-C <GoogleCalendar Name>:             the name of the GoogleCalendar you want to sync to. This calendar must be created first."
+	echo -e "\t-C <GoogleCalendar ID>:               ID of the GoogleCalendar you want to sync to (how to find it : http://goo.gl/oobl2v). This calendar must be created first."
 	echo -e "\t-p <temp path to save ics files>:     the path to save ics files 'in transit'. This path must be reachable via HTTP (i.e.: '/home/user/webserver/ical')"
 	echo -e "\t                                      and must exist before using this tool."
 	echo -e "\t-w <URL of temp path>:                the URL of the temp path (i.e.: 'http://my.server.com/path/to/icalpath')."
@@ -76,7 +70,7 @@ help () {
 	echo -e "\t-u <user to access to ics file>:      the user to use to connect to the URL of iCal-format (.ics) file (if authentification is needed)."
 	echo -e "\t-P <password to access to ics file>:  the  password of user to use to connect to the URL of iCal-format (.ics) file (if authentification is needed),"
 	echo -e "\t                                      must be filled if '- u' parameter is used. Asked if not filled."
-	echo -e "\t-B <perl bin path>:                   path to Perl bin (default: '${PERL_BIN}')"
+	echo -e "\t-B <ruby bin path>:                   path to Ruby bin (default: '${RUBY_BIN}')"
 	echo -e "\t-e <email report option>:             settings for sending a report by email, must be 'onerror', 'forcemail' or 'nomail' (default: '${EMAIL_REPORT}')"
 	echo -e "\t-E <email address>:                   email address to send the report (must be filled if '-e forcemail' or '-e onerror' options is used)"
 	echo -e "\t-j <log file>:                        enables logging instead of standard output. Specify an argument for the full path to the log file"
@@ -117,9 +111,6 @@ do
 						;;
 		n)	LOCAL_FILE=${OPTARG}
 			let optsCount=$optsCount+1
-						;;
-		m)	NETRC_CONFIG=${OPTARG}
-			let optsCount=$optsCount+1
                         ;;
         C)	CALENDAR_GCAL=${OPTARG}
 			let optsCount=$optsCount+1
@@ -127,15 +118,12 @@ do
 		p)	PATH_ICS=${OPTARG}
 			let optsCount=$optsCount+1
                         ;;
-        w)	WEB_PATH_ICS=${OPTARG}
-			let optsCount=$optsCount+1
-                        ;;
 	    u) 	CURL_USER=${OPTARG}
 			WITH_USER=1
 						;;
 		P) 	CURL_PASS=${OPTARG}
 						;;
-		B) 	PERL_BIN=${OPTARG}
+		B) 	RUBY_BIN=${OPTARG}
 						;;
         e)	EMAIL_REPORT=${OPTARG}
                         ;;                             
@@ -212,12 +200,6 @@ elif [[ ${EMAIL_REPORT} = "nomail" ]]
 	EMAIL_LEVEL=0
 fi
 
-# Test if ~/.netrc exists
-if [ ! -e ~/.netrc ]
-	then
-	error "Config file '~/.netrc' doesn't exist!\nHere is a sample '~/.netrc' config file:\n\tmachine ftp.freebsd.org\n\tlogin anonymous\n\tpassword edwin@mavetju.org\n\n\tmachine myownmachine\n\tlogin myusername\n\tpassword mypassword"
-fi
-
 # Installing $PYTHON_ICS_CLEANER if needed
 if [ ! -f ${PYTHON_ICS_CLEANER} ] 
 	then
@@ -233,21 +215,6 @@ if [ ! -f ${PYTHON_ICS_CLEANER} ]
 	fi
 fi
 
-# Installing $PERL_SYNC_SCRIPT if needed
-if [ ! -f ${PERL_SYNC_SCRIPT} ] 
-	then
-	echo -e "\nInstalling ${PERL_SYNC_SCRIPT}..."
-	wget -O ${PERL_SYNC_SCRIPT} --no-check-certificate https://raw.github.com/yvangodard/ical-to-google-calendar/master/ical-to-gcal.pl
-	if [ $? -ne 0 ] 
-		then
-		ERROR_MESSAGE_1=$(echo $?)
-		error "Error while downloading https://raw.github.com/yvangodard/ical-to-google-calendar/master/ical-to-gcal.pl.\n${ERROR_MESSAGE_1}.\nYou need to solve this before re-launching this tool."
-	else
-		echo -e "\t-> Installation OK"
-		chmod +x ${PERL_SYNC_SCRIPT}
-	fi
-fi
-
 ## Testons si l'URL est correcte
 if [[ ${WITH_USER} = "0" ]] 
 	then
@@ -260,12 +227,6 @@ elif [[ ${WITH_USER} = "1" ]]
 fi
 [ $URL_OK -eq 0 ] && echo "URL of ics calendar seems to be OK: ${URL_CALENDAR}."
 [ $URL_OK -ne 0 ] && echo "Possible problem to access to ics calendar: ${URL_CALENDAR}."
-
-## Test if '~/.netrc' entry exists
-grep ${NETRC_CONFIG} ~/.netrc > /dev/null
-GREP_NETRC=$?
-[ $GREP_NETRC -eq 0 ] && echo "This entry '${NETRC_CONFIG}' in '~/.netrc' seems to be correct."
-[ $GREP_NETRC -ne 0 ] && error "This entry '${NETRC_CONFIG}' in '~/.netrc' doesn't exist."
 
 # Test if temp path exists
 [ ! -d ${PATH_ICS} ] && error "The temp path '${PATH_ICS}' is not correct."
@@ -302,12 +263,12 @@ ${PYTHON_ICS_CLEANER} ${PATH_ICS}/${LOCAL_FILE}.ics 2>&1
 echo -e "***********\n"
 echo -e "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was completed successfully by '${PYTHON_ICS_CLEANER}'.\n"
 
-# Processing by ${PERL_SYNC_SCRIPT}
-echo "Processing commmand: '${PERL_SYNC_SCRIPT} --calendar=${CALENDAR_GCAL} --ical_url=${WEB_PATH_ICS}/${LOCAL_FILE}.gcal.ics --configmachine=${NETRC_CONFIG}'."
+# Processing by ${RUBY_SCRIPT}
+echo "Processing commmand: '${RUBY_BIN} ${RUBY_SCRIPT} --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
 echo -e "\n***********"
-${PERL_BIN} ${PERL_SYNC_SCRIPT} --calendar=${CALENDAR_GCAL} --ical_url=${WEB_PATH_ICS}/${LOCAL_FILE}.gcal.ics --configmachine=${NETRC_CONFIG} 2>&1
-[ $? -ne 0 ] && error "Errors when using ${PERL_SYNC_SCRIPT}"
+${RUBY_BIN} ${RUBY_SCRIPT} --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}
+[ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
 echo -e "***********\n"
-echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${PERL_SYNC_SCRIPT}'."
+echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
 
 alldone 0
