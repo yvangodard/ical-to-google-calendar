@@ -282,6 +282,7 @@ if [[ ${PURGE} = "1" ]]
 	echo -e "***********\n"
 	echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
 elif [[ ${PURGE} = "0" ]]
+	then
 	echo "Processing commmand: './$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
 	echo -e "\n***********"
 	./$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}
