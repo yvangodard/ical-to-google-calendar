@@ -25,7 +25,7 @@ help="no"
 SCRIPT_NAME=$(basename $0)
 SCRIPT_DIR=$(dirname $0)
 PYTHON_ICS_CLEANER=${SCRIPT_DIR}/ics-to-gcal.py
-RUBY_SCRIPT=${SCRIPT_DIR}/icalsync/icalsync
+RUBY_SCRIPT=/usr/local/icalsync/icalsync
 URL_CALENDAR=""
 LOCAL_FILE=""
 NETRC_CONFIG=""
@@ -50,7 +50,7 @@ help () {
 	echo -e "This tool includes some third-party scripts:"
 	echo -e "\t- ical-to-gcal.py: Original version by Keith McCammon available from http://mccammon.org/keith/code"
 	echo -e "\t  modded by Mario Aeby, http://eMeidi.com,https://github.com/emeidi/ical-to-gcal/blob/master/ical-to-gcal.py"
-	echo -e "\t- icalsyn: Written by Emmanuel Hoffman http://activeand.co"
+	echo -e "\t- icalsync: Written by Emmanuel Hoffman (http://activeand.co), http://goo.gl/RLUSJG"
 	echo -e "\nDisclamer:"
 	echo -e "This tool is provide without any support and guarantee."
 	echo -e "\nSynopsis:"
@@ -199,6 +199,9 @@ elif [[ ${EMAIL_REPORT} = "nomail" ]]
 	EMAIL_LEVEL=0
 fi
 
+# Test if icalsync is installed
+[[ ! -x ${RUBY_SCRIPT} ]] && error "icalsync seems not to be installed. Install this tool first.\nHave a look to http://goo.gl/RLUSJG"
+
 # Installing $PYTHON_ICS_CLEANER if needed
 if [[ ! -f ${PYTHON_ICS_CLEANER} ]] 
 	then
@@ -264,10 +267,10 @@ echo -e "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was completed succes
 
 # Processing by ${RUBY_SCRIPT}
 cd $(dirname ${RUBY_SCRIPT})
-echo "Processing commmand: '${RUBY_BIN} ${RUBY_SCRIPT} --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
+echo "Processing commmand: './$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
 echo -e "\n***********"
-export PATH=${GEM_PATH}:${PATH}
-./$(basename ${RUBY_SCRIPT}) -p -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}
+[[ -d ${GEM_PATH} ]] && export PATH=${GEM_PATH}:${PATH}
+./$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}
 [ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
 echo -e "***********\n"
 echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
