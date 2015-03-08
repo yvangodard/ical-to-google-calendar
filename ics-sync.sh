@@ -133,7 +133,7 @@ do
 	esac
 done
 
-if [[ ${optsCount} != "6" ]]
+if [[ ${optsCount} != "4" ]]
 	then
         help
         alldone 1
