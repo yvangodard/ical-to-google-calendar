@@ -124,7 +124,7 @@ do
 						;;
 		P) 	CURL_PASS=${OPTARG}
 						;;
-		g) 	[ ${OPTARG} = "purge" ] && PURGE=1
+		o) 	[ ${OPTARG} = "purge" ] && PURGE=1
 						;;
 		g) 	GEM_PATH=${OPTARG}
 						;;			
