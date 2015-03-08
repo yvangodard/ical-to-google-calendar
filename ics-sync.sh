@@ -41,6 +41,7 @@ ERROR=0
 EMAIL_REPORT="nomail"
 EMAIL_LEVEL=0
 WITH_USER=0
+GEM_PATH=/var/lib/gems/1.9.1/bin/
 
 help () {
 	echo -e "$VERSION\n"
@@ -264,6 +265,7 @@ echo -e "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was completed succes
 # Processing by ${RUBY_SCRIPT}
 echo "Processing commmand: '${RUBY_BIN} ${RUBY_SCRIPT} --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
 echo -e "\n***********"
+export PATH=${GEM_PATH}:${PATH}
 ${RUBY_BIN} ${RUBY_SCRIPT} --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL} -p -v
 [ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
 echo -e "***********\n"
