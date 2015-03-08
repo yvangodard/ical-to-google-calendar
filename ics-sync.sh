@@ -41,6 +41,7 @@ EMAIL_REPORT="nomail"
 EMAIL_LEVEL=0
 WITH_USER=0
 GEM_PATH=/var/lib/gems/1.9.1/bin/
+PURGE=0
 
 help () {
 	echo -e "$VERSION\n"
@@ -58,10 +59,10 @@ help () {
 	echo -e "                     -C <GoogleCalendar ID> -p <temp path to save ics files>"
 	echo -e "                    [-u <user to access to ics file>] [-P <password to access to ics file>]"
 	echo -e "                    [-e <email report option>] [-E <email address>] [-j <log file>]"
-	echo -e "                    [-g <gem path>]"
+	echo -e "                    [-g <gem path>] [-o <purge option>]"
 	echo -e "\n\t-h:                                   prints this help then exit"
 	echo -e "\nMandatory options:"
-	echo -e "\t-c <URL of iCal-format (.ics) file>:  the URL of iCal-format (.ics) source calendar (i.e.: 'http://my.server.com/path/to/icsfile.ics')"
+	echo -e "\t-c <URL of iCal-format (.ics) file>:  the URL of iCal-format (.ics) source calendar (e.g.: 'http://my.server.com/path/to/icsfile.ics')"
 	echo -e "\t-n <calendar temp name>:              the temp file name of this calendar"	
 	echo -e "\t-C <GoogleCalendar ID>:               ID of the GoogleCalendar you want to sync to (how to find it : http://goo.gl/oobl2v). This calendar must be created first."
 	echo -e "\t-p <temp path to save ics files>:     the path to save ics files 'in transit'."
@@ -70,10 +71,11 @@ help () {
 	echo -e "\t-P <password to access to ics file>:  the  password of user to use to connect to the URL of iCal-format (.ics) file (if authentification is needed),"
 	echo -e "\t                                      must be filled if '- u' parameter is used. Asked if not filled."
 	echo -e "\t-g <gem path>:                        path of gem installation directory (default: '${GEM_PATH}')"
+	echo -e "\t-o <purge option>:                    use '-o purge' to force a full sync (i.e.: delete all events on GCal before syncing)"
 	echo -e "\t-e <email report option>:             settings for sending a report by email, must be 'onerror', 'forcemail' or 'nomail' (default: '${EMAIL_REPORT}')"
 	echo -e "\t-E <email address>:                   email address to send the report (must be filled if '-e forcemail' or '-e onerror' options is used)"
 	echo -e "\t-j <log file>:                        enables logging instead of standard output. Specify an argument for the full path to the log file"
-	echo -e "\t                                      (i.e.: '${LOG}') or use 'default' (${LOG})"
+	echo -e "\t                                      (e.g.: '${LOG}') or use 'default' (${LOG})"
 	exit 0
 }
 
@@ -122,8 +124,10 @@ do
 						;;
 		P) 	CURL_PASS=${OPTARG}
 						;;
-		g) 	GEM_PATH=${OPTARG}
+		g) 	[ ${OPTARG} = "purge" ] && PURGE=1
 						;;
+		g) 	GEM_PATH=${OPTARG}
+						;;			
         e)	EMAIL_REPORT=${OPTARG}
                         ;;                             
         E)	EMAIL_ADDRESS=${OPTARG}
@@ -267,12 +271,23 @@ echo -e "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was completed succes
 
 # Processing by ${RUBY_SCRIPT}
 cd $(dirname ${RUBY_SCRIPT})
-echo "Processing commmand: './$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
-echo -e "\n***********"
 [[ -d ${GEM_PATH} ]] && export PATH=${GEM_PATH}:${PATH}
-./$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}
-[ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
-echo -e "***********\n"
-echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
+
+if [[ ${PURGE} = "1" ]]
+	then
+	echo "Processing commmand: './$(basename ${RUBY_SCRIPT}) -v -p -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
+	echo -e "\n***********"
+	./$(basename ${RUBY_SCRIPT}) -v -p -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}
+	[ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
+	echo -e "***********\n"
+	echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
+elif [[ ${PURGE} = "0" ]]
+	echo "Processing commmand: './$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
+	echo -e "\n***********"
+	./$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}
+	[ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
+	echo -e "***********\n"
+	echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
+fi
 
 alldone 0
