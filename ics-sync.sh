@@ -33,7 +33,6 @@ CALENDAR_GCAL=""
 PATH_ICS=""
 CURL_USER=""
 CURL_PASS=""
-RUBY_BIN=/usr/bin/ruby
 LOG=/var/log/ics_sync.log
 LOG_ACTIVE=0
 LOG_TEMP=$(mktemp /tmp/tmp_log_ics_sync.XXXXX)
@@ -57,8 +56,9 @@ help () {
 	echo -e "\nSynopsis:"
 	echo -e "./$SCRIPT_NAME [-h] | -c <URL of iCal-format (.ics) file> -n <Calendar temp name>"
 	echo -e "                     -C <GoogleCalendar ID> -p <temp path to save ics files>"
-	echo -e "                    [-u <user to access to ics file>] [-P <password to access to ics file>] [-B <ruby bin path>]"
+	echo -e "                    [-u <user to access to ics file>] [-P <password to access to ics file>]"
 	echo -e "                    [-e <email report option>] [-E <email address>] [-j <log file>]"
+	echo -e "                    [-g <gem path>]"
 	echo -e "\n\t-h:                                   prints this help then exit"
 	echo -e "\nMandatory options:"
 	echo -e "\t-c <URL of iCal-format (.ics) file>:  the URL of iCal-format (.ics) source calendar (i.e.: 'http://my.server.com/path/to/icsfile.ics')"
@@ -69,7 +69,7 @@ help () {
 	echo -e "\t-u <user to access to ics file>:      the user to use to connect to the URL of iCal-format (.ics) file (if authentification is needed)."
 	echo -e "\t-P <password to access to ics file>:  the  password of user to use to connect to the URL of iCal-format (.ics) file (if authentification is needed),"
 	echo -e "\t                                      must be filled if '- u' parameter is used. Asked if not filled."
-	echo -e "\t-B <ruby bin path>:                   path to Ruby bin (default: '${RUBY_BIN}')"
+	echo -e "\t-g <gem path>:                        path of gem installation directory (default: '${GEM_PATH}')"
 	echo -e "\t-e <email report option>:             settings for sending a report by email, must be 'onerror', 'forcemail' or 'nomail' (default: '${EMAIL_REPORT}')"
 	echo -e "\t-E <email address>:                   email address to send the report (must be filled if '-e forcemail' or '-e onerror' options is used)"
 	echo -e "\t-j <log file>:                        enables logging instead of standard output. Specify an argument for the full path to the log file"
@@ -122,7 +122,7 @@ do
 						;;
 		P) 	CURL_PASS=${OPTARG}
 						;;
-		B) 	RUBY_BIN=${OPTARG}
+		g) 	GEM_PATH=${OPTARG}
 						;;
         e)	EMAIL_REPORT=${OPTARG}
                         ;;                             
@@ -264,8 +264,6 @@ echo -e "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was completed succes
 
 # Processing by ${RUBY_SCRIPT}
 cd $(dirname ${RUBY_SCRIPT})
-echo "PATH : $(dirname ${RUBY_SCRIPT})"
-echo "basename : $(basename ${RUBY_SCRIPT})"
 echo "Processing commmand: '${RUBY_BIN} ${RUBY_SCRIPT} --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
 echo -e "\n***********"
 export PATH=${GEM_PATH}:${PATH}
