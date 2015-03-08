@@ -102,7 +102,7 @@ alldone () {
 
 optsCount=0
 
-while getopts "hc:n:m:C:p:w:u:P:B:e:E:j:" OPTION
+while getopts "hc:n:C:p:u:P:e:E:j:o:" OPTION
 do
 	case "$OPTION" in
 		h)	help="yes"
