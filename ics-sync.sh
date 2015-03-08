@@ -63,9 +63,7 @@ help () {
 	echo -e "\t-c <URL of iCal-format (.ics) file>:  the URL of iCal-format (.ics) source calendar (i.e.: 'http://my.server.com/path/to/icsfile.ics')"
 	echo -e "\t-n <calendar temp name>:              the temp file name of this calendar"	
 	echo -e "\t-C <GoogleCalendar ID>:               ID of the GoogleCalendar you want to sync to (how to find it : http://goo.gl/oobl2v). This calendar must be created first."
-	echo -e "\t-p <temp path to save ics files>:     the path to save ics files 'in transit'. This path must be reachable via HTTP (i.e.: '/home/user/webserver/ical')"
-	echo -e "\t                                      and must exist before using this tool."
-	echo -e "\t-w <URL of temp path>:                the URL of the temp path (i.e.: 'http://my.server.com/path/to/icalpath')."
+	echo -e "\t-p <temp path to save ics files>:     the path to save ics files 'in transit'."
 	echo -e "\nOptional options:"
 	echo -e "\t-u <user to access to ics file>:      the user to use to connect to the URL of iCal-format (.ics) file (if authentification is needed)."
 	echo -e "\t-P <password to access to ics file>:  the  password of user to use to connect to the URL of iCal-format (.ics) file (if authentification is needed),"
@@ -266,7 +264,7 @@ echo -e "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was completed succes
 # Processing by ${RUBY_SCRIPT}
 echo "Processing commmand: '${RUBY_BIN} ${RUBY_SCRIPT} --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
 echo -e "\n***********"
-${RUBY_BIN} ${RUBY_SCRIPT} --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}
+${RUBY_BIN} ${RUBY_SCRIPT} --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL} -p -v
 [ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
 echo -e "***********\n"
 echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
