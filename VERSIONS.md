@@ -10,6 +10,12 @@ Versions
 
 \! Known issue / missing feature
 
+#### 2.0
+------------
+\* Code rewriting : include OAuth for GoogleCalendar (see [http://goo.gl/RLUSJG](http://goo.gl/RLUSJG))
+
+\* Code rewriting : use API v3 GoogleCalendar (see [http://goo.gl/RLUSJG](http://goo.gl/RLUSJG))
+
 #### 1.2
 ------------
 \* Script now works with parameters
