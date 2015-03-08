@@ -269,7 +269,7 @@ echo "basename : $(basename ${RUBY_SCRIPT})"
 echo "Processing commmand: '${RUBY_BIN} ${RUBY_SCRIPT} --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
 echo -e "\n***********"
 export PATH=${GEM_PATH}:${PATH}
-${RUBY_BIN} ./$(basename ${RUBY_SCRIPT}) --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL} -p -v
+./$(basename ${RUBY_SCRIPT}) -p -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}
 [ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
 echo -e "***********\n"
 echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
