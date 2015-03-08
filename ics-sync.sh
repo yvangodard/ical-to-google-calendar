@@ -199,7 +199,7 @@ elif [[ ${EMAIL_REPORT} = "nomail" ]]
 fi
 
 # Installing $PYTHON_ICS_CLEANER if needed
-if [ ! -f ${PYTHON_ICS_CLEANER} ] 
+if [[ ! -f ${PYTHON_ICS_CLEANER} ]] 
 	then
 	echo -e "\nInstalling ${PYTHON_ICS_CLEANER}..."
 	wget -O ${PYTHON_ICS_CLEANER} --no-check-certificate https://raw.github.com/yvangodard/ical-to-google-calendar/master/ical-to-gcal.py
