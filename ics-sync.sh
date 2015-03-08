@@ -49,8 +49,6 @@ help () {
 	echo -e "For that, it downloads the ics file, parse it with a cleaner script to avoid incompatibily with Google (with a python Script),"
 	echo -e "and a simple Perl script parse the cleaned file, and updates a Google Calendar with it, via the Google Calendar API (only one way)."
 	echo -e "This tool includes some third-party scripts:"
-	echo -e "\t- ical-to-gcal.py: Original version by Keith McCammon available from http://mccammon.org/keith/code"
-	echo -e "\t  modded by Mario Aeby, http://eMeidi.com,https://github.com/emeidi/ical-to-gcal/blob/master/ical-to-gcal.py"
 	echo -e "\t- icalsync: Written by Emmanuel Hoffman (http://activeand.co), http://goo.gl/RLUSJG"
 	echo -e "\nDisclamer:"
 	echo -e "This tool is provide without any support and guarantee."
@@ -206,21 +204,6 @@ fi
 # Test if icalsync is installed
 [[ ! -x ${RUBY_SCRIPT} ]] && error "icalsync seems not to be installed. Install this tool first.\nHave a look to http://goo.gl/RLUSJG"
 
-# Installing $PYTHON_ICS_CLEANER if needed
-if [[ ! -f ${PYTHON_ICS_CLEANER} ]] 
-	then
-	echo -e "\nInstalling ${PYTHON_ICS_CLEANER}..."
-	wget -O ${PYTHON_ICS_CLEANER} --no-check-certificate https://raw.github.com/yvangodard/ical-to-google-calendar/master/ical-to-gcal.py
-	if [ $? -ne 0 ] 
-		then
-		ERROR_MESSAGE=$(echo $?)
-		error "Error while downloading https://raw.github.com/yvangodard/ical-to-google-calendar/master/ical-to-gcal.py.\n${ERROR_MESSAGE}.\nYou need to solve this before re-launching this tool."
-	else
-		echo -e "\t-> Installation OK"
-		chmod +x ${PYTHON_ICS_CLEANER}
-	fi
-fi
-
 ## Testons si l'URL est correcte
 if [[ ${WITH_USER} = "0" ]] 
 	then
@@ -241,7 +224,6 @@ GWNER_PATH_ICS=$(stat -c %G ${PATH_ICS})
 
 # Removing old files
 [ -e ${PATH_ICS}/${LOCAL_FILE}.ics ] && rm ${PATH_ICS}/${LOCAL_FILE}.ics
-[ -e ${PATH_ICS}/${LOCAL_FILE}.gcal.ics ] && rm ${PATH_ICS}/${LOCAL_FILE}.gcal.ics
 
 # Downloading ics file
 if [[ ${WITH_USER} = "0" ]] 
@@ -261,31 +243,23 @@ else
 	error "File ${PATH_ICS}/${LOCAL_FILE}.ics doesn't exist"
 fi
 
-# Processing by ${PYTHON_ICS_CLEANER}
-echo -e "\nProcessing command: '${PYTHON_ICS_CLEANER} ${PATH_ICS}/${LOCAL_FILE}.ics'."
-echo -e "\n***********"
-${PYTHON_ICS_CLEANER} ${PATH_ICS}/${LOCAL_FILE}.ics 2>&1
-[ $? -ne 0 ] && error "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was not completed successfully by '${PYTHON_ICS_CLEANER}'."
-echo -e "***********\n"
-echo -e "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was completed successfully by '${PYTHON_ICS_CLEANER}'.\n"
-
 # Processing by ${RUBY_SCRIPT}
 cd $(dirname ${RUBY_SCRIPT})
 [[ -d ${GEM_PATH} ]] && export PATH=${GEM_PATH}:${PATH}
 
 if [[ ${PURGE} = "1" ]]
 	then
-	echo "Processing commmand: './$(basename ${RUBY_SCRIPT}) -v -p -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
+	echo "Processing commmand: './$(basename ${RUBY_SCRIPT}) -v -p -f ${PATH_ICS}/${LOCAL_FILE}.ics --cal-id ${CALENDAR_GCAL}'."
 	echo -e "\n***********"
-	./$(basename ${RUBY_SCRIPT}) -v -p -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL} 2>&1
+	./$(basename ${RUBY_SCRIPT}) -v -p -f ${PATH_ICS}/${LOCAL_FILE}.ics --cal-id ${CALENDAR_GCAL} 2>&1
 	[ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
 	echo -e "***********\n"
 	echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
 elif [[ ${PURGE} = "0" ]]
 	then
-	echo "Processing commmand: './$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
+	echo "Processing commmand: './$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.ics --cal-id ${CALENDAR_GCAL}'."
 	echo -e "\n***********"
-	./$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL} 2>&1
+	./$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.ics --cal-id ${CALENDAR_GCAL} 2>&1
 	[ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
 	echo -e "***********\n"
 	echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
