@@ -263,10 +263,12 @@ echo -e "***********\n"
 echo -e "File processing on '${PATH_ICS}/${LOCAL_FILE}.ics' was completed successfully by '${PYTHON_ICS_CLEANER}'.\n"
 
 # Processing by ${RUBY_SCRIPT}
+cd $(dirname ${RUBY_SCRIPT})
+echo "PATH : $(dirname ${RUBY_SCRIPT})"
+echo "basename : $(basename ${RUBY_SCRIPT})"
 echo "Processing commmand: '${RUBY_BIN} ${RUBY_SCRIPT} --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
 echo -e "\n***********"
 export PATH=${GEM_PATH}:${PATH}
-cd $(dirname ${RUBY_SCRIPT})
 ${RUBY_BIN} ./$(basename ${RUBY_SCRIPT}) --file ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL} -p -v
 [ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
 echo -e "***********\n"
