@@ -277,7 +277,7 @@ if [[ ${PURGE} = "1" ]]
 	then
 	echo "Processing commmand: './$(basename ${RUBY_SCRIPT}) -v -p -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
 	echo -e "\n***********"
-	./$(basename ${RUBY_SCRIPT}) -v -p -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}
+	./$(basename ${RUBY_SCRIPT}) -v -p -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL} 2>&1
 	[ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
 	echo -e "***********\n"
 	echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
@@ -285,7 +285,7 @@ elif [[ ${PURGE} = "0" ]]
 	then
 	echo "Processing commmand: './$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}'."
 	echo -e "\n***********"
-	./$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL}
+	./$(basename ${RUBY_SCRIPT}) -v -f ${PATH_ICS}/${LOCAL_FILE}.gcal.ics --cal-id ${CALENDAR_GCAL} 2>&1
 	[ $? -ne 0 ] && error "Errors when using ${RUBY_SCRIPT}"
 	echo -e "***********\n"
 	echo -e "The file '${PATH_ICS}/${LOCAL_FILE}.gcal.ics' has been successfully processed by the script '${RUBY_SCRIPT}'."
