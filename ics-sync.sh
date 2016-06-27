@@ -207,11 +207,11 @@ fi
 ## Testons si l'URL est correcte
 if [[ ${WITH_USER} = "0" ]] 
 	then
-	curl -k -s --head ${URL_CALENDAR} | head -n 1 | grep "HTTP/1.1 200 OK" > /dev/null
+	curl -L -k -s --head ${URL_CALENDAR} | head -n 1 | grep "HTTP/1.1 200 OK" > /dev/null
 	URL_OK=$?
 elif [[ ${WITH_USER} = "1" ]]
 	then
-	curl -k -s -u ${CURL_USER}:${CURL_PASS} --head ${URL_CALENDAR} | head -n 1 | grep "HTTP/1.1 200 OK" > /dev/null
+	curl -L -k -s -u ${CURL_USER}:${CURL_PASS} --head ${URL_CALENDAR} | head -n 1 | grep "HTTP/1.1 200 OK" > /dev/null
 	URL_OK=$?
 fi
 [ $URL_OK -eq 0 ] && echo "URL of ics calendar seems to be OK: ${URL_CALENDAR}."
@@ -228,10 +228,10 @@ GWNER_PATH_ICS=$(stat -c %G ${PATH_ICS})
 # Downloading ics file
 if [[ ${WITH_USER} = "0" ]] 
 	then
-	curl -k --silent ${URL_CALENDAR} -o ${PATH_ICS}/${LOCAL_FILE}.ics && chown -R ${OWNER_PATH_ICS}:${GWNER_PATH_ICS} ${PATH_ICS}
+	curl -L -k --silent ${URL_CALENDAR} -o ${PATH_ICS}/${LOCAL_FILE}.ics && chown -R ${OWNER_PATH_ICS}:${GWNER_PATH_ICS} ${PATH_ICS}
 elif [[ ${WITH_USER} = "1" ]]
 	then
-	curl -k --silent -u ${CURL_USER}:${CURL_PASS} ${URL_CALENDAR} -o ${PATH_ICS}/${LOCAL_FILE}.ics && chown -R ${OWNER_PATH_ICS}:${GWNER_PATH_ICS} ${PATH_ICS}
+	curl -L -k --silent -u ${CURL_USER}:${CURL_PASS} ${URL_CALENDAR} -o ${PATH_ICS}/${LOCAL_FILE}.ics && chown -R ${OWNER_PATH_ICS}:${GWNER_PATH_ICS} ${PATH_ICS}
 fi
 
 ## Test if file seems to be correct (contains BEGIN:VCALENDAR)
